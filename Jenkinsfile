@@ -52,10 +52,8 @@ podTemplate(
         }
         stage ('Helm Deploy') {
             container ('helm') {
-                sh "helm upgrade apifraud fraudapp-chart -n fraud -i --wait --set image.repository=${repository},image.tag=${commitId}"
+                sh "helm upgrade apifraud fraudapp-chart -n fraude -i --wait --set image.repository=${repository},image.tag=${commitId}"
             }
         }
     }
 }
-
-[ ! -z \"\$(kubectl get ns fraud -o name 2>/dev/null)\" ] || kubectl get ns
