@@ -1,3 +1,9 @@
+// def createNamespace (namespace) {
+//     echo "Creating namespace ${namespace} if needed"
+
+//     sh "[ ! -z \"\$(kubectl get ns ${namespace} -o name 2>/dev/null)\" ] || kubectl create ns ${namespace}"
+// }
+
 podTemplate(
     label: 'mypod', 
     inheritFrom: 'default',
@@ -9,7 +15,7 @@ podTemplate(
             command: 'cat'
         ),
         containerTemplate(
-            name: 'helmmm', 
+            name: 'helm', 
             image: 'ahmedcheibani/jenkins-slave-kubectl-helm:latest',
             ttyEnabled: true,
             command: 'cat'
@@ -45,9 +51,11 @@ podTemplate(
             }
         }
         stage ('Helm Deploy') {
-            container ('helmmm') {
+            container ('helm') {
                 sh "helm upgrade apifraud fraudapp-chart -n fraud -i --wait --set image.repository=${repository},image.tag=${commitId}"
             }
         }
     }
 }
+
+[ ! -z \"\$(kubectl get ns fraud -o name 2>/dev/null)\" ] || kubectl get ns

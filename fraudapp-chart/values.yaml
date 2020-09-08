@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: ahmedcheibani/fraud
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -38,8 +38,9 @@ securityContext: {}
 
 service:
   type: NodePort
-  port: 80
-
+  port: 5000
+  targetPort: 5000
+  nodePort: 32700
 ingress:
   enabled: false
   annotations: {}
@@ -77,3 +78,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+ports:
+  containerPort: 5000
+
+
+#  {{ .Values.service.targetPort }}

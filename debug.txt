@@ -1,0 +1,160 @@
+Release "apifraud" does not exist. Installing it now.
+NAME: apifraud
+LAST DEPLOYED: Tue Sep  8 16:07:15 2020
+NAMESPACE: web
+STATUS: pending-install
+REVISION: 1
+USER-SUPPLIED VALUES:
+{}
+
+COMPUTED VALUES:
+affinity: {}
+autoscaling:
+  enabled: false
+  maxReplicas: 100
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 80
+fullnameOverride: ""
+image:
+  pullPolicy: IfNotPresent
+  repository: ahmedcheibani/fraud
+  tag: latest
+imagePullSecrets: []
+ingress:
+  annotations: {}
+  enabled: false
+  hosts:
+  - host: proxym
+    paths: []
+  tls: []
+nameOverride: ""
+nodeSelector: {}
+podAnnotations: {}
+podSecurityContext: {}
+ports:
+  containerPort: 5000
+replicaCount: 1
+resources: {}
+securityContext: {}
+service:
+  nodePort: 32700
+  port: 5000
+  targetPort: 5000
+  type: NodePort
+serviceAccount:
+  annotations: {}
+  create: true
+  name: ""
+tolerations: []
+
+HOOKS:
+---
+# Source: fraudapp-chart/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "apifraud-fraudapp-chart-test-connection"
+  labels:
+    helm.sh/chart: fraudapp-chart-0.1.0
+    app.kubernetes.io/name: fraudapp-chart
+    app.kubernetes.io/instance: apifraud
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['apifraud-fraudapp-chart:5000']
+  restartPolicy: Never
+MANIFEST:
+---
+# Source: fraudapp-chart/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: apifraud-fraudapp-chart
+  labels:
+    helm.sh/chart: fraudapp-chart-0.1.0
+    app.kubernetes.io/name: fraudapp-chart
+    app.kubernetes.io/instance: apifraud
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: fraudapp-chart/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: apifraud-fraudapp-chart
+  labels:
+    helm.sh/chart: fraudapp-chart-0.1.0
+    app.kubernetes.io/name: fraudapp-chart
+    app.kubernetes.io/instance: apifraud
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 32700
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: fraudapp-chart
+    app.kubernetes.io/instance: apifraud
+---
+# Source: fraudapp-chart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apifraud-fraudapp-chart
+  labels:
+    helm.sh/chart: fraudapp-chart-0.1.0
+    app.kubernetes.io/name: fraudapp-chart
+    app.kubernetes.io/instance: apifraud
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fraudapp-chart
+      app.kubernetes.io/instance: apifraud
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fraudapp-chart
+        app.kubernetes.io/instance: apifraud
+    spec:
+      serviceAccountName: apifraud-fraudapp-chart
+      securityContext:
+        {}
+      containers:
+        - name: fraudapp-chart
+          securityContext:
+            {}
+          image: "ahmedcheibani/fraud:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+          resources:
+            {}
+
+NOTES:
+1. Get the application URL by running these commands:
+  export NODE_PORT=$(kubectl get --namespace web -o jsonpath="{.spec.ports[0].nodePort}" services apifraud-fraudapp-chart)
+  export NODE_IP=$(kubectl get nodes --namespace web -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
