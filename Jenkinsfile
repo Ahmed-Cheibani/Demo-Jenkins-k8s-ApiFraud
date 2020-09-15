@@ -27,18 +27,23 @@ podTemplate(
             mountPath: '/var/run/docker.sock'
         )
     ]
-) {
-    node('mypod') {
+) 
+{
+    node('mypod') 
+    {
         def commitId
-        stage ('Checkout Source') {
+        stage ('Checkout Source') 
+        {
             checkout scm
             commitId = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
             sh "echo $commitId"
         }
-        }
+        
         def repository
-        stage ('Docker build && push ') {
-            container ('docker') {
+        stage ('Docker build && push ') 
+        {
+            container ('docker') 
+            {
                 def registryIp = sh(script: 'getent hosts registry.kube-system | awk \'{ print $1 ; exit }\'', returnStdout: true).trim()
                 sh "echo $registryIp"
                 repository = "ahmedcheibani/fraudapp"
@@ -50,10 +55,12 @@ podTemplate(
                 }
             }
         }
-        stage ('Helm Deploy') {
-            container ('helm') {
+        stage ('Helm Deploy') 
+        {
+            container ('helm') 
+            {
                 sh "helm upgrade apifraud fraudapp-chart -n fraude -i --wait --set image.repository=${repository},image.tag=${commitId}"
             }
         }
-    }
+    }   
 }
