@@ -82,7 +82,7 @@ podTemplate(
         {
             container ('helm') 
             {
-                sh "helm upgrade apifraud fraudapp-chart -n fraude -i --wait --set image.repository=ahmedcheibani/fraud_detection,image.tag=v1"
+                sh "helm upgrade apifraud fraudapp-chart -n fraude -i --wait --set image.repository=ngnix,image.tag=latest"
             }
         }
     }   
