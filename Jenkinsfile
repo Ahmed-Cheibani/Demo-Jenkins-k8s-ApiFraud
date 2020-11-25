@@ -40,26 +40,58 @@ podTemplate(
         }
         
         def repository
-        stage ('Docker build && push ') 
-        {
-            container ('docker') 
-            {
-                def registryIp = sh(script: 'getent hosts registry.kube-system | awk \'{ print $1 ; exit }\'', returnStdout: true).trim()
-                sh "echo $registryIp"
-                repository = "ahmedcheibani/fraudapp"
-                withCredentials([usernamePassword(credentialsId: 'dockerhub_login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])
-                {
-                sh 'docker login --username="${USERNAME}" --password="${PASSWORD}"'
-                sh "docker build -t ${repository}:${commitId} ."
-                sh "docker push ${repository}:${commitId}"
-                }
-            }
+        stage ('Docker build app ') 
+        {   
+             echo " this part required proxy "
+            // container ('docker') 
+            // {
+            //     def registryIp = sh(script: 'getent hosts registry.kube-system | awk \'{ print $1 ; exit }\'', returnStdout: true).trim()
+            //     sh "echo $registryIp"
+            //     repository = "ahmedcheibani/fraudapp"
+            //     withCredentials([usernamePassword(credentialsId: 'dockerhub_login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])
+            //     {
+            //     sh 'docker login --username="${USERNAME}" --password="${PASSWORD}"'
+            //     sh "docker build -t ${repository}:${commitId} ."
+            //   
+            //     }
+            // }
         }
-        stage ('Helm Deploy') 
+        
+        stage ('Docker push images to registry') 
+        {
+            echo " this part required proxy "
+           // container ('docker') 
+            // {
+            //     def registryIp = sh(script: 'getent hosts registry.kube-system | awk \'{ print $1 ; exit }\'', returnStdout: true).trim()
+            //     sh "echo $registryIp"
+            //     repository = "ahmedcheibani/fraudapp"
+            //     withCredentials([usernamePassword(credentialsId: 'dockerhub_login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])
+            //     {
+            //     sh 'docker login --username="${USERNAME}" --password="${PASSWORD}"'
+            //     sh "docker push ${repository}:${commitId}"
+            //     }
+            // }
+        }
+        
+         stage ('Test app') 
+        {
+          steps {
+             parallel(
+                      TestUnitaire: {
+                        echo " run Test unitaire"
+                         },
+                      Repport: {
+                        echo " report of test"
+                         }
+                    )
+                }
+        }
+        
+        stage ('Helm Deploy Application to Kubernates') 
         {
             container ('helm') 
             {
-                sh "helm upgrade apifraud fraudapp-chart -n fraude -i --wait --set image.repository=${repository},image.tag=${commitId}"
+                sh "helm upgrade apifraud fraudapp-chart -n fraude -i --wait --set image.repository=ahmedcheibani/fraud_detection,image.tag=v1"
             }
         }
     }   
