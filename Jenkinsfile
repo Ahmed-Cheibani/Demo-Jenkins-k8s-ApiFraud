@@ -75,16 +75,7 @@ podTemplate(
         
          stage ('Test app') 
         {
-          steps {
-             parallel(
-                      TestUnitaire: {
-                        echo " run Test unitaire"
-                         },
-                      Repport: {
-                        echo " report of test"
-                         }
-                    )
-                }
+          echo "test app "
         }
         
         stage ('Helm Deploy Application to Kubernates') 
