@@ -4,6 +4,7 @@
 //     sh "[ ! -z \"\$(kubectl get ns ${namespace} -o name 2>/dev/null)\" ] || kubectl create ns ${namespace}"
 // }
 
+
 podTemplate(
     label: 'mypod', 
     inheritFrom: 'default',
